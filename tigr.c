@@ -566,6 +566,67 @@ void tigrPlot(Tigr* bmp, int x, int y, TPixel pix) {
     }
 }
 
+Tigr * tigrGetResized (Tigr * bmp, int new_width, int new_height){
+    Tigr * new_bmp = tigrBitmap(new_width, new_height);
+    
+    for (int y = 0; y < new_height; y++){
+    for (int x = 0; x < new_width; x++){
+        new_bmp->pix[(y)*new_width + (x)] = bmp->pix[(y*bmp->h/new_height)*bmp->w + (x*bmp->w/new_width)];
+    }}
+
+    return new_bmp;
+}
+
+void tigrSetResized (Tigr ** bmp, int new_width, int new_height){
+    Tigr * new_bmp = tigrBitmap(new_width, new_height);
+
+    for (int y = 0; y < new_height; y++){
+    for (int x = 0; x < new_width; x++){
+        new_bmp->pix[(y)*new_width + (x)] = (*bmp)->pix[(y*((*bmp)->h)/new_height)*(*bmp)->w + (x*(*bmp)->w/new_width)];
+    }}
+
+    tigrFree(*bmp);
+    *bmp = new_bmp;
+}
+
+Tigr * tigrClone(Tigr * bmp){
+    Tigr * new_bmp = tigrBitmap(bmp->w, bmp->h);
+    for (int y = 0; y < bmp->h; y++){
+        memcpy(new_bmp->pix + y*bmp->w, bmp->pix + y*bmp->w, bmp->w*sizeof(TPixel));
+    }
+    return new_bmp;
+}
+
+Tigr * tigrGetRotated (Tigr * bmp, double angle){
+    // Caching the sine and cosine values of the angle for performance
+    const double sin_a = sin(angle);
+    const double cos_a = cos(angle);
+
+    // Width and height of rotated bmp; and creating new bmp
+    const int new_height = abs(bmp->w * sin_a) + abs(bmp->h * cos_a);
+    const int new_width = abs(bmp->w * sin_a) + abs(bmp->h * cos_a);
+    const int new_center_x = new_width/2;
+    const int new_center_y = new_height/2;
+
+    // Getting the center of the bmp
+    const int old_center_x = bmp->w/2;
+    const int old_center_y = bmp->h/2;
+
+    Tigr * new_bmp = tigrBitmap(new_width, new_height);
+    for (int y = 0; y < new_height; y++){
+    for (int x = 0; x < new_width; x++){
+        int old_x =  (x-new_center_x)*cos_a + (y-new_center_y)*sin_a + old_center_x;
+        int old_y = -(x-new_center_x)*sin_a + (y-new_center_y)*cos_a + old_center_y;
+        if (old_x >= 0 && old_y >= 0 && old_x < bmp->w && old_y < bmp->h){
+            new_bmp->pix[y*new_width + x] = bmp->pix[old_y*bmp->w + old_x];
+        } else {
+            new_bmp->pix[y*new_width + x] = tigrRGBA(0, 0, 0, 0);
+        }
+    }}
+
+    return new_bmp;
+}
+
 void tigrClip(Tigr* bmp, int cx, int cy, int cw, int ch) {
     bmp->cx = cx;
     bmp->cy = cy;

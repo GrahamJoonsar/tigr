@@ -154,6 +154,22 @@ void tigrCircle(Tigr *bmp, int x, int y, int r, TPixel color);
 // Clips and blends.
 void tigrFillCircle(Tigr *bmp, int x, int y, int r, TPixel color);
 
+// Returns a new resized bitmap without modifying the old one
+Tigr * tigrGetResized (Tigr * bmp, int new_width, int new_height);
+
+// Resizes the bitmap you pass
+// Needs a double pointer to actually change the bmp
+void tigrSetResized (Tigr ** bmp, int new_width, int new_height);
+
+// Returns a copy of the bitmap you passed in
+// When done, remember to free both the bitmap you passed in and the one returned
+Tigr * tigrClone(Tigr * bmp);
+
+// Returns a bitmap containing the bmp you passed in rotated at the angle in radians
+// The blank space is replaced by a transparent color, so use tigrBlitAlpha when displaying
+// When done, remember to free both the bitmap you passed in and the one returned
+Tigr * tigrGetRotated (Tigr * bmp, double angle);
+
 // Sets clip rect.
 // Set to (0, 0, -1, -1) to reset clipping to full bitmap.
 void tigrClip(Tigr *bmp, int cx, int cy, int cw, int ch);
